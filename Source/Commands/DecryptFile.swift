@@ -19,7 +19,15 @@ struct DecryptFile: ParsableCommand {
             return URL(fileURLWithPath: output)
         } else {
             let lastPathComponent = file.components(separatedBy: "/").last ?? "decrypted"
-            return URL(fileURLWithPath: "/tmp/" + lastPathComponent)
+            // Try rootless path first, fall back to regular /tmp/
+            let rootlessTmp = "/var/jb/tmp/"
+            let regularTmp = "/tmp/"
+
+            if FileManager.default.isWritableFile(atPath: rootlessTmp) {
+                return URL(fileURLWithPath: rootlessTmp + lastPathComponent)
+            } else {
+                return URL(fileURLWithPath: regularTmp + lastPathComponent)
+            }
         }
     }
 
